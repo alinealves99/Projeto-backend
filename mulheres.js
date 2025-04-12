@@ -3,6 +3,8 @@ const app = express(); //iniciando o app
 const porta = 3333; // criando a porta
 const router = express.Router();// configurando a primeira parte da rota
 const { v4:uuidv4} = require('uuid');
+
+app.use(express.json());
 //Lista inicial de mulheres
 const mulheres = [
     {
