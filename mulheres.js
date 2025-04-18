@@ -9,22 +9,25 @@ app.use(express.json());
 const mulheres = [
     {
         id:'1',
-        nome: 'Aline Ribeiro',
-        imagem:'https://media.licdn.com/dms/image/v2/C4D03AQGdmzDr-6VsQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1628692640734?e=1747267200&v=beta&t=Uos1vXN_52lIBnstQL6JoELt-3lQ_gTrqyRCCJddx1A',
-        minibio: 'Desenvolvedora front-end'
+        nome: 'Ada Lovelace',
+        imagem:'https://upload.wikimedia.org/wikipedia/commons/a/a4/Ada_Lovelace_portrait.jpg',
+        minibio: 'Ada Lovelace (1815–1852) é considerada a primeira programadora da história. Ela escreveu o primeiro algoritmo destinado a ser processado por uma máquina, a máquina analítica de Charles Babbage, antecipando conceitos da computação moderna.'
     },
+
     {
         id:'2',
-        nome: 'Aline Ribeiro',
-        imagem:'https://media.licdn.com/dms/image/v2/C4D03AQGdmzDr-6VsQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1628692640734?e=1747267200&v=beta&t=Uos1vXN_52lIBnstQL6JoELt-3lQ_gTrqyRCCJddx1A',
-        minibio: 'Desenvolvedora front-end'
+        nome: 'Grace Hopper',
+        imagem:'https://upload.wikimedia.org/wikipedia/commons/a/ad/Commodore_Grace_M._Hopper%2C_USN_%28covered%29.jpg',
+        minibio: 'Grace Hopper (1906–1992) foi uma cientista da computação e contra-almirante da Marinha dos EUA. Ela desenvolveu a linguagem de programação COBOL e popularizou o termo “bug” na computação. Seu trabalho foi essencial na popularização da programação.'
     },
+
     {
         id:'3',
-        nome: 'Aline Ribeiro',
-        imagem:'https://media.licdn.com/dms/image/v2/C4D03AQGdmzDr-6VsQw/profile-displayphoto-shrink_800_800/profile-displayphoto-shrink_800_800/0/1628692640734?e=1747267200&v=beta&t=Uos1vXN_52lIBnstQL6JoELt-3lQ_gTrqyRCCJddx1A',
-        minibio: 'Desenvolvedora front-end'
+        nome: 'Margaret Hamilton',
+        imagem:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Margaret_Hamilton_1995.jpg/500px-Margaret_Hamilton_1995.jpg',
+        minibio: 'Margaret Hamilton (nascida em 1936) foi diretora de engenharia de software do projeto Apollo da NASA. Ela liderou a equipe que escreveu o código que levou o homem à Lua e cunhou o termo “engenharia de software'
     }
+    
 ]
 
 //PORTA
@@ -52,6 +55,35 @@ response.json(mulheres)
 
 }
 
-app.listen(porta,mostraPorta);// Servidor ouvindo a porta
+//PATCH
+function corrigeMulher(request, response){
+    function encontraMulher(mulher){
+        if(mulher.id === request.params.id){
+            return mulher;
+        }
+    }
+
+    const mulherEncontrada = mulheres.find(encontraMulher);
+
+    if(request.body.nome){
+        mulherEncontrada.nome = request.body.nome;
+    }
+
+    if(request.body.minibio){
+        mulherEncontrada.minibio = request.body.minibio;
+    }
+
+    if(request.body.imagem){
+        mulherEncontrada.imagem = request.body.imagem;
+    }
+
+    response.json(mulheres);
+}
+
+
 app.use(router.post('/mulheres', criaMulher)) // configuração rota POST /mulheres
-app.use(router.get('/mulheres',mostraMulheres));// configuração rota GET /mulheres
+app.use(router.get('/mulheres',mostraMulheres))// configuração rota GET /mulheres
+app.use(router.patch('/mulheres/:id', corrigeMulher))//configurei rota PATCH /mulheres
+
+app.listen(porta,mostraPorta);// Servidor ouvindo a porta
+
