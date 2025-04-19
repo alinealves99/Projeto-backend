@@ -1,89 +1,98 @@
-const express = require("express"); //iniciando o express
-const app = express(); //iniciando o app
-const porta = 3333; // criando a porta
-const router = express.Router();// configurando a primeira parte da rota
-const { v4:uuidv4} = require('uuid');
+const express = require("express"); //Iniciando o express
+const app = express(); //Iniciando o app
+const porta = 3333; // Criando a porta
+const router = express.Router();// Configurando a primeira parte da rota
+const cors = require('cors'); //Trazendo o pacote cors - que permite consumir essa api no front-end
+const conectaBancoDeDados = require('./bancoDeDados');//Ligando ao arquivo bancoDeDados
+
+conectaBancoDeDados();//Chamando a função que conecta o banco de dados
+
+const Mulher = require('./mulherModel');
 
 app.use(express.json());
-//Lista inicial de mulheres
-const mulheres = [
-    {
-        id:'1',
-        nome: 'Ada Lovelace',
-        imagem:'https://upload.wikimedia.org/wikipedia/commons/a/a4/Ada_Lovelace_portrait.jpg',
-        minibio: 'Ada Lovelace (1815–1852) é considerada a primeira programadora da história. Ela escreveu o primeiro algoritmo destinado a ser processado por uma máquina, a máquina analítica de Charles Babbage, antecipando conceitos da computação moderna.'
-    },
+app.use(cors());
 
-    {
-        id:'2',
-        nome: 'Grace Hopper',
-        imagem:'https://upload.wikimedia.org/wikipedia/commons/a/ad/Commodore_Grace_M._Hopper%2C_USN_%28covered%29.jpg',
-        minibio: 'Grace Hopper (1906–1992) foi uma cientista da computação e contra-almirante da Marinha dos EUA. Ela desenvolveu a linguagem de programação COBOL e popularizou o termo “bug” na computação. Seu trabalho foi essencial na popularização da programação.'
-    },
-
-    {
-        id:'3',
-        nome: 'Margaret Hamilton',
-        imagem:'https://upload.wikimedia.org/wikipedia/commons/thumb/6/68/Margaret_Hamilton_1995.jpg/500px-Margaret_Hamilton_1995.jpg',
-        minibio: 'Margaret Hamilton (nascida em 1936) foi diretora de engenharia de software do projeto Apollo da NASA. Ela liderou a equipe que escreveu o código que levou o homem à Lua e cunhou o termo “engenharia de software'
-    }
-    
-]
 
 //PORTA
-function mostraPorta(){
-    console.log("Servidor",porta);
+function mostraPorta() {
+    console.log("Servidor", porta);
 
 }
 //GET
-function mostraMulheres(request,response){
-    response.json(mulheres);
+async function mostraMulheres(request, response) {
+    try {
+        const mulheresVindasDoBancoDeDados = await Mulher.find();
+
+        response.json(mulheresVindasDoBancoDeDados);
+
+    } catch (erro) {
+        console.log(erro)
+    }
 }
 
 //POST
-function criaMulher (request,response){
-    const novaMulher ={
-    id:uuidv4(),
-    nome:request.body.nome,
-    imagem:request.body.imagem,
-    minibio:request.body.minibio
-}
+async function criaMulher(request, response) {
+    const novaMulher = new Mulher({
+        nome: request.body.nome,
+        imagem: request.body.imagem,
+        minibio: request.body.minibio,
+        citacao: request.body.citacao
+    })
 
-mulheres.push(novaMulher)
-
-response.json(mulheres)
+    try {
+        const mulherCriada = await novaMulher.save();
+        response.status(201).json(mulherCriada)
+    } catch (erro) {
+        console.log(erro);
+    }
 
 }
 
 //PATCH
-function corrigeMulher(request, response){
-    function encontraMulher(mulher){
-        if(mulher.id === request.params.id){
-            return mulher;
+async function corrigeMulher(request, response) {
+    try{
+        const mulherEncontrada = await Mulher.findById(request.params.id)
+    
+        if (request.body.nome) {
+            mulherEncontrada.nome = request.body.nome;
         }
+    
+        if (request.body.minibio) {
+            mulherEncontrada.minibio = request.body.minibio;
+        }
+    
+        if (request.body.imagem) {
+            mulherEncontrada.imagem = request.body.imagem;
+        }
+
+        if (request.body.citacao) {
+            mulherEncontrada.citacao = request.body.citacao;
+        }
+        
+        const mulherAtualizadaNoBancoDeDados = await mulherEncontrada.save();
+        response.json(mulherAtualizadaNoBancoDeDados);
+
+    } catch(erro){
+        console.log(erro);
     }
 
-    const mulherEncontrada = mulheres.find(encontraMulher);
-
-    if(request.body.nome){
-        mulherEncontrada.nome = request.body.nome;
-    }
-
-    if(request.body.minibio){
-        mulherEncontrada.minibio = request.body.minibio;
-    }
-
-    if(request.body.imagem){
-        mulherEncontrada.imagem = request.body.imagem;
-    }
-
-    response.json(mulheres);
 }
 
+async function deletaMulher(request, response) {
+    try{
+        await Mulher.findByIdAndDelete(request.params.id);
+        response.json({messagem: 'Mulher deletada com sucesso!'})
 
-app.use(router.post('/mulheres', criaMulher)) // configuração rota POST /mulheres
-app.use(router.get('/mulheres',mostraMulheres))// configuração rota GET /mulheres
-app.use(router.patch('/mulheres/:id', corrigeMulher))//configurei rota PATCH /mulheres
+    } catch(erro){
 
-app.listen(porta,mostraPorta);// Servidor ouvindo a porta
+        console.log(erro);
+    }
+}
+
+app.use(router.post('/mulheres', criaMulher)); // Configuração rota POST /mulheres
+app.use(router.get('/mulheres', mostraMulheres));// Configuração rota GET /mulheres
+app.use(router.patch('/mulheres/:id', corrigeMulher));//Configuração rota PATCH /mulheres
+app.use(router.delete('/mulheres/:id', deletaMulher));//Configuração rota DELETE /mulheres
+
+app.listen(porta, mostraPorta);// Servidor ouvindo a porta
 
