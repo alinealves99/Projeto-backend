@@ -1,4 +1,4 @@
-# Projeto: Minha Primeira API - CRUD de Mulheres
+# 👩‍🚀 Projeto: Minha Primeira API - CRUD de Mulheres
 
 Este repositório contém a API desenvolvida durante o curso **Back-End | Minha Primeira API** com a instrutora **Simara Conceição**, realizado pela [Programaria](https://www.programaria.org/). O foco do projeto foi construir um CRUD completo (Create, Read, Update, Delete) de mulheres inspiradoras da tecnologia, aplicando conceitos fundamentais de desenvolvimento back-end com **Node.js** e **MongoDB**, além da integração com front-end e deploy em produção.
 
